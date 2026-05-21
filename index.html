@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCQ – al_witify</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Rajdhani:wght@300;400;600&family=Tajawal:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c1: #0a0a1a;
+    --c2: #0d1b3e;
+    --c3: #1a0a3e;
+    --accent1: #7b2fff;
+    --accent2: #00e5ff;
+    --accent3: #ff2d78;
+    --gold: #ffd700;
+    --correct: #00e676;
+    --wrong: #ff1744;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--c1);
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: #fff;
+  }
+
+  /* ── ANIMATED BACKGROUND ── */
+  #bg-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .gradient-orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.18;
+    animation: orbFloat 18s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .orb1 { width: 600px; height: 600px; background: radial-gradient(circle, #7b2fff, transparent); top: -10%; left: -10%; animation-delay: 0s; }
+  .orb2 { width: 500px; height: 500px; background: radial-gradient(circle, #00e5ff, transparent); top: 40%; right: -10%; animation-delay: -6s; }
+  .orb3 { width: 400px; height: 400px; background: radial-gradient(circle, #ff2d78, transparent); bottom: -5%; left: 30%; animation-delay: -12s; }
+
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(40px, -60px) scale(1.08); }
+    66% { transform: translate(-30px, 40px) scale(0.95); }
+  }
+
+  /* ── PARTICLE CANVAS ── */
+  #particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+  /* ── CONTENT WRAPPER ── */
+  .content { position: relative; z-index: 10; }
+
+  /* ── HOME SCREEN ── */
+  #home {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 10px;
+  }
+
+  .brand-name {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(2.2rem, 6vw, 4.5rem);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--gold) 0%, #fff 40%, var(--accent2) 70%, var(--gold) 100%);
+    background-size: 300% 300%;
+    -webkit-background-clip: text;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 4s ease-in-out infinite;
+    letter-spacing: 2px;
+    text-align: center;
+    margin-bottom: 8px;
+  }
+
+  @keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .subtitle {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 300;
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    color: rgba(255,255,255,0.65);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 60px;
+    text-align: center;
+  }
+
+  .sem-cards {
+    display: flex;
+    gap: 28px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .sem-card {
+    width: 260px;
+    height: 180px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .sem-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+    opacity: 0;
+    transition: opacity 0.4s;
+    z-index: -1;
+  }
+
+  .sem-card:hover::before { opacity: 1; }
+  .sem-card:hover { transform: translateY(-8px) scale(1.03); background: rgba(255,255,255,0.08); box-shadow: 0 30px 60px rgba(123,47,255,0.3); }
+
+  .sem-icon { font-size: 3rem; }
+  .sem-label {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 1px;
+    text-align: center;
+  }
+  .sem-count { font-size: 0.8rem; color: rgba(255,255,255,0.45); letter-spacing: 2px; }
+
+  /* ── QUIZ SCREEN ── */
+  #quiz { display: none; min-height: 100vh; padding: 20px; }
+
+  .quiz-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 24px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .back-btn {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    border-radius: 10px;
+    padding: 8px 14px;
+    transition: all 0.3s;
+  }
+  .back-btn:hover { background: rgba(255,255,255,0.1); }
+
+  .quiz-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(0.85rem, 2vw, 1.1rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gold), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    flex: 1;
+  }
+
+  .score-badge {
+    background: rgba(123,47,255,0.25);
+    border: 1px solid rgba(123,47,255,0.5);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent2);
+    white-space: nowrap;
+  }
+
+  /* PROGRESS BAR */
+  .progress-wrap {
+    max-width: 800px;
+    margin: 0 auto 24px;
+    height: 4px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2));
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* QUESTIONS */
+  .questions-container { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; padding-bottom: 60px; }
+
+  .question-card {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    padding: 28px;
+    transition: border-color 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .q-number {
+    font-size: 0.72rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--accent1);
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .q-text {
+    font-size: clamp(0.92rem, 2vw, 1.05rem);
+    line-height: 1.65;
+    color: rgba(255,255,255,0.92);
+    margin-bottom: 22px;
+    font-weight: 400;
+  }
+
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .option-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: left;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.95rem;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 400;
+    line-height: 1.4;
+    width: 100%;
+  }
+  .option-btn:not(.answered):hover { background: rgba(123,47,255,0.15); border-color: rgba(123,47,255,0.4); transform: translateX(4px); }
+
+  .opt-letter {
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.25s;
+  }
+
+  .option-btn.correct { background: rgba(0,230,118,0.15); border-color: var(--correct); color: #fff; }
+  .option-btn.correct .opt-letter { background: var(--correct); border-color: var(--correct); color: #000; }
+  .option-btn.wrong { background: rgba(255,23,68,0.15); border-color: var(--wrong); color: rgba(255,255,255,0.6); }
+  .option-btn.wrong .opt-letter { background: var(--wrong); border-color: var(--wrong); color: #fff; }
+  .option-btn.answered { cursor: default; }
+
+  /* ── EMOJI BURST ── */
+  .emoji-burst {
+    position: fixed;
+    font-size: 2rem;
+    pointer-events: none;
+    z-index: 9999;
+    animation: emojiFly 1.4s ease-out forwards;
+  }
+  @keyframes emojiFly {
+    0% { transform: translate(-50%, -50%) scale(0.4) rotate(-10deg); opacity: 1; }
+    60% { opacity: 1; transform: translate(-50%, -120%) scale(1.4) rotate(10deg); }
+    100% { transform: translate(-50%, -200%) scale(0.8) rotate(20deg); opacity: 0; }
+  }
+
+  /* ── RESULT OVERLAY ── */
+  .result-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(10px);
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    padding: 30px;
+  }
+  .result-overlay.show { display: flex; }
+  .result-title { font-family: 'Cinzel Decorative', serif; font-size: 2.5rem; background: linear-gradient(135deg, var(--gold), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .result-score { font-size: 4rem; font-weight: 700; color: var(--accent2); }
+  .result-msg { font-size: 1.1rem; color: rgba(255,255,255,0.7); max-width: 400px; line-height: 1.6; }
+  .result-btn { padding: 14px 40px; border-radius: 30px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; color: #fff; font-size: 1rem; font-family: 'Rajdhani', sans-serif; font-weight: 600; cursor: pointer; letter-spacing: 2px; transition: transform 0.2s; }
+  .result-btn:hover { transform: scale(1.05); }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); }
+  ::-webkit-scrollbar-thumb { background: var(--accent1); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div class="gradient-orb orb1"></div>
+<div class="gradient-orb orb2"></div>
+<div class="gradient-orb orb3"></div>
+<canvas id="particles"></canvas>
+
+<div class="content">
+
+  <div id="home">
+    <div class="brand-name"> al_witify</div>
+    <div class="subtitle">MCQ of 1st &amp; 2nd Semester</div>
+    <div class="sem-cards">
+      <div class="sem-card" data-sem="1">
+        <div class="sem-icon">1️⃣</div>
+        <div class="sem-label">1st Semester</div>
+        <div class="sem-count">30 QUESTIONS</div>
+      </div>
+      <div class="sem-card" data-sem="2">
+        <div class="sem-icon">2️⃣</div>
+        <div class="sem-label">2nd Semester</div>
+        <div class="sem-count">40 QUESTIONS</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="quiz">
+    <div class="quiz-header">
+      <button class="back-btn" id="backBtn">← Back</button>
+      <div class="quiz-title" id="quizTitle"></div>
+      <div class="score-badge" id="scoreBadge">Score: 0 / 0</div>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="progressBar"></div></div>
+    <div class="questions-container" id="questionsContainer"></div>
+  </div>
+
+</div>
+
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-title">Quiz Complete!</div>
+  <div class="result-score" id="resultScore"></div>
+  <div class="result-msg" id="resultMsg"></div>
+  <button class="result-btn" id="resultBtn">Try Again</button>
+</div>
+
+<script>
+(function(){
+  // ==================== DATA ====================
+  const sem1 = [
+    {q:"Human body can synthesis all fatty acids except _______.", opts:["linoleic acid","linolenic acid","stearic acid","both a and b"], ans:3},
+    {q:"In fatty acid synthesis, citrate synthesis occurs in the _______.", opts:["cytosol","mitochondrial matrix","peroxisome","golgi apparatus"], ans:1},
+    {q:"Prolonged consumption of a high carbohydrate diet causes an increase in _______ synthesis.", opts:["acetyl CoA carboxylase","Phospholipids","free fatty acids","both a and c"], ans:3},
+    {q:"Lingual and gastric lipases play an important role in lipid digestion in _______.", opts:["childhood","neonates","adult","all of the above"], ans:1},
+    {q:"Desaturases enzymes present in the _______.", opts:["smooth endoplasmic reticulum","cytosol","mitochondria","peroxisome"], ans:0},
+    {q:"The _______ pathway is the major source of the NADPH required for fatty acid synthesis.", opts:["ketogenesis and amino acid catabolism","lipolysis","hexose monophosphate","lipogeneses"], ans:2},
+    {q:"_______ released from the intestine.", opts:["high density lipoprotein","very low density lipoprotein","chylomicron","intermediate low density lipoprotein"], ans:2},
+    {q:"Colipase is a protein secreted by the _______.", opts:["pancreas","gallbladder","liver","stomach"], ans:0},
+    {q:"Metformin, used in the treatment of type 2 diabetes mellitus, lowers serum _______.", opts:["triacylglycerol","cholesterol","phospholipids","isoprenoids"], ans:0},
+    {q:"Orlistat, an antiobesity drug, inhibit _______.", opts:["pancreatic lipases","lingual lipase","gastric lipase","both a, and c"], ans:3},
+    {q:"Which one of the following fatty acids will generate the highest amount of ATP upon complete oxidation to CO2 and H2O?", opts:["C20:0","C22:1(Δ⁹)","C22:0","C20:2(Δ⁶, Δ⁹)"], ans:2},
+    {q:"The digestion of dietary lipids in neonates begins in the _______.", opts:["Stomach","Mouth","Large intestine","Small intestine"], ans:0},
+    {q:"Fatty acid synthesis is turned off when triacylglycerol degradation is turned on because acetyl CoA carboxylase is inhibited by high level of _______.", opts:["insulin","secretin","glucagon","both b and c"], ans:2},
+    {q:"In ß-oxidation of fatty acids, _______ deficiency causes sudden infant death syndrome (SIDS).", opts:["short-chain acyl-CoA dehydrogenase (SCAD)","long-chain acyl-CoA dehydrogenase (LCAD)","Medium-chain acyl-CoA dehydrogenase (MCAD)","None of the above"], ans:2},
+    {q:"In the synthesis of free fatty acids, the step of malonyl CoA synthesis requires _______.", opts:["Biotin","Vitamin B12","Methyl malonyl COA mutase","Both b and c"], ans:0},
+    {q:"Product of Krebs cycle essential for oxidative phosphorylation is ———", opts:["NADPH and ATP","Acetyl CoA","CO2 and oxaloacetate","NADH and FADH2"], ans:3},
+    {q:"_______ accepts hydrogen from malate.", opts:["FAD","NAD","NADP","FMN"], ans:1},
+    {q:"Which of the following is not formed during the Krebs cycle?", opts:["Lactate","Isocitrate","Succinate","Both (a) and (b)"], ans:0},
+    {q:"ATP synthesis is powered by:", opts:["Coenzyme motive force","cAMP","proton gradient","GTP hydrolysis"], ans:2},
+    {q:"PFK-1 is activated by all of the following EXCEPT:", opts:["AMP","ADP","Fructose-2,6-bisphosphate","ATP"], ans:3},
+    {q:"A deficiency of pyruvate kinase in RBCs leads to:", opts:["Hypoglycemia","Hemolytic anemia","Excess ATP production","Increased oxidative phosphorylation"], ans:1},
+    {q:'The term "amphibolic pathway" refers to:', opts:["Purely degradative","Purely synthetic","Both catabolic and anabolic","ATP-independent pathways"], ans:2},
+    {q:"Primary metabolism mainly involves:", opts:["TCA cycle","Glycolysis","Electron transport chain","Digestion of macromolecules"], ans:1},
+    {q:"Secondary or intermediary metabolism primarily produces:", opts:["ATP","Ketone bodies","NADH and FADH2","Lactate"], ans:2},
+    {q:"NAD⁺ depletion during glycolysis causes:", opts:["Increased pyruvate synthesis","Glycolysis to stop","Increased ATP generation","Activation of PFK-2"], ans:1},
+    {q:"A 43-year-old man presented with symptoms of weakness, fatigue, shortness of breath, and dizziness. His hemoglobin level was less than 7 g/dl (normal for a male being greater than 13.5 g/dl). Red blood cells isolated from the patient showed abnormally low level of lactate production. A deficiency of which one of the following enzymes would be the most likely cause of this patient's anemia?", opts:["Phosphoglucose isomerase","Phosphofructokinase","Pyruvate kinase","Hexokinase"], ans:2},
+    {q:"Insulin rise significantly. Which metabolic pathway becomes most active in liver?", opts:["Gluconeogenesis","Glycogen synthesis","Lipolysis in adipose tissue","Ketone body formation"], ans:1},
+    {q:"A patient has been fasting for 12 hours. Which process provides major fuel for the brain at this time?", opts:["Glucose from glycogenolysis","Ketone bodies","Fatty acids","Muscle protein breakdown"], ans:0},
+    {q:"A malnourished patient has fasted for 5 days. Which brain fuel utilization pattern is expected?", opts:["Uses only glucose","Uses lactate preferentially","Uses fatty acids transported via albumin","Uses ketone bodies for 60-70% of energy"], ans:3},
+    {q:"A drug blocks electron transport in mitochondria. Which metabolic stage is disrupted?", opts:["Primary metabolism","Secondary metabolism","Tertiary metabolism","Digestion"], ans:2}
+  ];
+
+  const sem2 = [
+    {q:"A patient with a history of chronic alcoholism is evaluated. Laboratory results show an AST of 210 IU/L and an ALT of 65 IU/L. What is the most likely interpretation of this AST/ALT ratio?", opts:["Non-alcoholic fatty liver disease","Acute viral hepatitis","Alcoholic liver disease","Wilson's disease"], ans:2},
+    {q:"A patient with cirrhosis has a serum albumin of 2.5 g/dL and develops new-onset peripheral edema and ascites. Which of the following best explains the pathophysiology of this fluid accumulation?", opts:["Increased hydrostatic pressure due to portal hypertension.","Decreased plasma oncotic pressure due to hypoalbuminemia.","Increased capillary permeability due to inflammation.","Lymphatic obstruction by fibrotic tissue."], ans:1},
+    {q:"Which of the following liver functions is most directly assessed by measuring the prothrombin time (PT) in a patient with suspected liver disease?", opts:["Detoxification of ammonia","Conjugation of bilirubin","Synthetic function for coagulation factors","Excretory function for bile salts"], ans:2},
+    {q:"A 25-year-old man presents with fatigue and jaundice. His labs show an unconjugated hyperbilirubinemia with a total bilirubin of 3.5 mg/dL, normal liver enzymes, and no evidence of hemolysis on his blood smear. What is the most likely diagnosis?", opts:["Dubin-Johnson syndrome","Rotor's syndrome","Crigler-Najjar syndrome","Gilbert's syndrome"], ans:3},
+    {q:"A 50-year-old man with chronic kidney disease has an estimated glomerular filtration rate (eGFR) of 28 mL/min/1.73m². Which stage of chronic kidney disease does this represent?", opts:["Stage 2 (Mild)","Stage 3a (Mild to moderate)","Stage 5 (Kidney failure)","Stage 4 (Severe)"], ans:3},
+    {q:"A diabetic patient's urine analysis reveals a urine albumin-to-creatinine ratio (UACR) of 80 mg/g. What does this finding indicate?", opts:["Microalbuminuria, an early sign of kidney damage","Overt proteinuria and advanced kidney disease","Normal kidney function","A urinary tract infection"], ans:0},
+    {q:"Which of the following is a primary endocrine function of the healthy kidney?", opts:["Conversion of 25-hydroxyvitamin D to 1,25-dihydroxyvitamin D.","Production of aldosterone.","Secretion of atrial natriuretic peptide (ANP).","Synthesis of thyroid hormone."], ans:0},
+    {q:"A patient's labs show a very high blood urea nitrogen (BUN) out of proportion to a mild elevation in creatinine. Which of the following clinical scenarios would best explain this pattern?", opts:["Acute glomerulonephritis","Severe dehydration (prerenal azotemia)","Rhabdomyolysis","Bilateral renal artery stenosis"], ans:1},
+    {q:"Which of the following is a defining characteristic of a malignant tumor?", opts:["Encapsulated and does not invade surrounding tissue.","Cells are well-differentiated and resemble normal cells.","Ability to metastasize to distant sites via blood or lymph.","Slow growth rate that may remain stable for years."], ans:2},
+    {q:"A mutation in a tumor suppressor gene is most likely to contribute to cancer by:", opts:["Promoting angiogenesis.","Activating telomerase to allow unlimited cell division.","Encoding for a growth factor that is constantly secreted.","Losing its function, which removes a 'brake' on cell division."], ans:3},
+    {q:"A 60-year-old woman undergoing treatment for breast cancer has her CA 15-3 levels monitored. What is the primary clinical utility of this tumor marker?", opts:["To screen the general population for breast cancer.","To definitively diagnose the specific type of breast cancer.","To monitor response to therapy and detect recurrence.","To determine the anatomical stage of the tumor (TNM)."], ans:2},
+    {q:"A patient's liver biopsy reveals a defect in the heme synthesis pathway, leading to a diagnosis of porphyria. Which of the following medications is known to be a common trigger for acute attacks of porphyria due to its effect on hepatic heme synthesis?", opts:["Acetaminophen","Barbiturates","Penicillin","Furosemide"], ans:1},
+    {q:"A patient with a history of gallstones presents with acute-onset right upper quadrant pain, fever, and jaundice. Her labs show a total bilirubin of 4 mg/dL (mostly conjugated), ALP of 450 IU/L, and GGT of 300 IU/L. Her ALT is 120 IU/L. Which pattern of liver injury does this represent?", opts:["Hepatocellular pattern","Cholestatic pattern","Mixed pattern","Infiltrative pattern"], ans:1},
+    {q:"A 55-year-old patient presents with jaundice, dark urine, and a total serum bilirubin of 6 mg/dL. Which of the following findings would be most consistent with a diagnosis of hepatocellular injury rather than a post-hepatic obstruction?", opts:["A strongly positive urine bilirubin test.","Serum alkaline phosphatase (ALP) of 400 IU/L with a normal GGT.","Serum ALT of 2,500 IU/L and AST of 1,800 IU/L.","Serum albumin of 2.8 g/dL and a normal prothrombin time."], ans:2},
+    {q:"A 40-year-old woman is found to have an elevated alkaline phosphatase (ALP) on routine blood work. Her gamma-glutamyl transferase (GGT) is normal, but she has a history of a recent fracture. What is the most appropriate next step?", opts:["Order a 5'-nucleotidase test to confirm a hepatobiliary source.","Suspect that the elevated ALP is of bone origin.","Order an abdominal ultrasound to look for biliary obstruction.","Check serum calcium and parathyroid hormone levels."], ans:1},
+    {q:"Which of the following tumor markers is most commonly used to monitor for recurrence in a patient with colorectal cancer?", opts:["CA 15-3","CA 19-9","Carcinoembryonic antigen (CEA)","Alpha-fetoprotein (AFP)"], ans:2},
+    {q:"A patient with a liver mass and chronic hepatitis B has a markedly elevated alpha-fetoprotein (AFP). What is the most likely diagnosis?", opts:["Cholangiocarcinoma","Hepatocellular carcinoma (HCC)","Hepatic adenoma","Metastatic colon cancer"], ans:1},
+    {q:"A breast cancer patient's CA 15-3 level was elevated before treatment, normalized after surgery and chemotherapy, and is now rising again. What does this most likely indicate?", opts:["Successful treatment","A medication side effect","A benign breast cyst","Tumor recurrence"], ans:3},
+    {q:"Which of the following statements best describes the role of CA 19-9 in pancreatic cancer?", opts:["It is a reliable screening test for early pancreatic cancer.","It is used to monitor response to treatment and detect recurrence.","It is 100% specific for pancreatic adenocarcinoma.","It is used to diagnose the type of pancreatic cancer."], ans:1},
+    {q:"The liver receives a dual blood supply. What is the percentage of hepatic blood flow contributed by the portal vein, and what is its primary function?", opts:["75%; to provide nutrient rich blood from the gastrointestinal tract.","25%; to provide oxygenated blood to the liver.","50%; to provide blood rich in clotting factors.","100%; to serve as the sole source of blood for the liver."], ans:0},
+    {q:"Growth hormone is secreted from:", opts:["Anterior pituitary","Posterior pituitary","Thyroid gland","Adrenal gland"], ans:0},
+    {q:"GH secretion is stimulated by:", opts:["Somatostatin","GHRH","Cortisol","Insulin"], ans:1},
+    {q:"GH secretion is inhibited by:", opts:["GHRH","Dopamine","Somatostatin","Thyroxine"], ans:2},
+    {q:"GH mainly acts through:", opts:["Insulin","IGF-1","Cortisol","TSH"], ans:1},
+    {q:"Excess GH in adults causes:", opts:["Gigantism","Dwarfism","Acromegaly","Cretinism"], ans:2},
+    {q:"GH increases:", opts:["Glucose uptake","Protein synthesis","Fat storage","Insulin sensitivity"], ans:1},
+    {q:"Prolactin is secreted from:", opts:["Posterior pituitary","Anterior pituitary","Thyroid","Pancreas"], ans:1},
+    {q:"Lipid-soluble hormones act mainly by:", opts:["Binding to membrane receptors","Activating second messengers","Binding to intracellular (nuclear) receptors","Opening ion channels"], ans:2},
+    {q:"Lipid-soluble hormones have what effect on gene expression?", opts:["No effect","Decrease transcription only","Increase or decrease transcription","Destroy DNA"], ans:2},
+    {q:"Protein (peptide) hormones act by:", opts:["Entering the nucleus directly","Binding to intracellular receptors","Binding to cell membrane receptors","Binding to DNA directly"], ans:2},
+    {q:"The receptor for peptide hormones is usually located in the:", opts:["Nucleus","Cytoplasm","Cell membrane","Mitochondria"], ans:2},
+    {q:"TRH has what effect on prolactin?", opts:["Inhibits","Stimulates","No effect","Destroys"], ans:1},
+    {q:"Thyroid hormones are:", opts:["Peptides","Steroids","Amino acid derivatives","Lipids"], ans:2},
+    {q:"ADH (Antidiuretic Hormone) acts on the kidney to:", opts:["Increase urine output","Decrease water reabsorption","Increase water reabsorption in collecting ducts","Increase sodium excretion only"], ans:2},
+    {q:"Thyroid hormones increase:", opts:["Basal metabolic rate","Body weight","Sleep","Calcium loss"], ans:0},
+    {q:"TSH is secreted from:", opts:["Thyroid","Hypothalamus","Anterior pituitary","Posterior pituitary"], ans:2},
+    {q:"Oxytocin is mainly responsible for:", opts:["Increasing blood glucose","Milk ejection and uterine contraction","Decreasing urine output","Stimulating thyroid hormone release"], ans:1},
+    {q:"Hypothyroidism in children causes:", opts:["Gigantism","Acromegaly","Cretinism","Goiter only"], ans:2},
+    {q:"Hyperthyroidism causes:", opts:["Weight gain","Bradycardia","Weight loss","Cold intolerance"], ans:2},
+    {q:"Thyroid hormones act by:", opts:["Cell membrane receptors","Nuclear receptors","Cytoplasmic enzymes","Ion channels"], ans:1}
+  ];
+
+  // ==================== PARTICLES ====================
+  const canvas = document.getElementById('particles');
+  let ctx = canvas.getContext('2d');
+  let particles = [];
+  let width, height;
+
+  function resizeCanvas() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  for (let i = 0; i < 70; i++) {
+    particles.push({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: Math.random() * 1.8 + 0.4,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      a: Math.random(),
+      da: 0.004 + Math.random() * 0.003,
+      col: `hsl(${220 + Math.random() * 140}, 80%, 70%)`
+    });
+  }
+
+  function drawParticles() {
+    if (!ctx) return;
+    ctx.clearRect(0, 0, width, height);
+    for (let p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      p.a += p.da;
+      if (p.a > 1 || p.a < 0) p.da = -p.da;
+      if (p.x < 0) p.x = width;
+      if (p.x > width) p.x = 0;
+      if (p.y < 0) p.y = height;
+      if (p.y > height) p.y = 0;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.col;
+      ctx.globalAlpha = p.a * 0.7;
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(drawParticles);
+  }
+  drawParticles();
+
+  // ==================== AUDIO ====================
+  let audioContext = null;
+  function getAudioContext() {
+    if (!audioContext && window.AudioContext) {
+      audioContext = new AudioContext();
+    }
+    return audioContext;
+  }
+
+  function playCorrectSound() {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(523, ctx.currentTime);
+    osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+    gain.gain.setValueAtTime(0.18, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.6);
+  }
+
+  function playWrongSound() {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(220, ctx.currentTime);
+    osc.frequency.setValueAtTime(180, ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.4);
+  }
+
+  // ==================== EMOJI BURST ====================
+  const correctEmojis = ['🤍', '❤️', '❤️‍🔥', '🔥', '💯'];
+  const wrongEmojis = ['💔', '🤦', '😑', '🦖', '❌', '🏂'];
+
+  function spawnEmoji(isCorrect, x, y) {
+    const emojis = isCorrect ? correctEmojis : wrongEmojis;
+    const count = isCorrect ? 4 : 3;
+    for (let i = 0; i < count; i++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'emoji-burst';
+        el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        el.style.left = (x + (Math.random() - 0.5) * 80) + 'px';
+        el.style.top = (y + (Math.random() - 0.5) * 40) + 'px';
+        el.style.fontSize = (1.5 + Math.random()) + 'rem';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1500);
+      }, i * 120);
+    }
+  }
+
+  // ==================== QUIZ STATE ====================
+  let currentSem = null;
+  let currentQuestions = [];
+  let score = 0;
+  let answeredCount = 0;
+  let totalQuestions = 0;
+  let userAnswers = new Map();
+
+  const homeDiv = document.getElementById('home');
+  const quizDiv = document.getElementById('quiz');
+  const quizTitle = document.getElementById('quizTitle');
+  const scoreBadge = document.getElementById('scoreBadge');
+  const progressBar = document.getElementById('progressBar');
+  const questionsContainer = document.getElementById('questionsContainer');
+  const resultOverlay = document.getElementById('resultOverlay');
+  const resultScore = document.getElementById('resultScore');
+  const resultMsg = document.getElementById('resultMsg');
+
+  function updateUI() {
+    scoreBadge.textContent = `Score: ${score} / ${answeredCount}`;
+    const percent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+    progressBar.style.width = `${percent}%`;
+  }
+
+  function renderQuestions() {
+    questionsContainer.innerHTML = '';
+    for (let i = 0; i < currentQuestions.length; i++) {
+      const q = currentQuestions[i];
+      const card = document.createElement('div');
+      card.className = 'question-card';
+      card.id = `qcard-${i}`;
+      
+      const letters = ['a', 'b', 'c', 'd'];
+      let optionsHtml = '';
+      for (let j = 0; j < q.opts.length; j++) {
+        optionsHtml += `
+          <button class="option-btn" data-qidx="${i}" data-optidx="${j}">
+            <span class="opt-letter">${letters[j]}</span>
+            <span>${q.opts[j]}</span>
+          </button>
+        `;
+      }
+      
+      card.innerHTML = `
+        <div class="q-number">Question ${i+1} of ${totalQuestions}</div>
+        <div class="q-text">${q.q}</div>
+        <div class="options" id="opts-${i}">${optionsHtml}</div>
+      `;
+      questionsContainer.appendChild(card);
+    }
+    
+    for (let btn of document.querySelectorAll('.option-btn')) {
+      btn.addEventListener('click', (e) => {
+        const qidx = parseInt(btn.dataset.qidx);
+        const optidx = parseInt(btn.dataset.optidx);
+        handleAnswer(btn, qidx, optidx);
+      });
+    }
+    
+    for (let [qidx, answeredData] of userAnswers) {
+      const wasCorrect = answeredData.correct;
+      const selectedIdx = answeredData.selected;
+      const correctIdx = currentQuestions[qidx].ans;
+      const btns = document.querySelectorAll(`#opts-${qidx} .option-btn`);
+      if (btns[selectedIdx]) btns[selectedIdx].classList.add(wasCorrect ? 'correct' : 'wrong');
+      if (!wasCorrect && btns[correctIdx]) btns[correctIdx].classList.add('correct');
+      for (let btn of btns) btn.classList.add('answered');
+    }
+  }
+
+  function handleAnswer(btn, qIdx, optIdx) {
+    if (userAnswers.has(qIdx)) return;
+    
+    const question = currentQuestions[qIdx];
+    const isCorrect = (optIdx === question.ans);
+    const rect = btn.getBoundingClientRect();
+    
+    if (isCorrect) {
+      score++;
+      playCorrectSound();
+      spawnEmoji(true, rect.left + rect.width/2, rect.top + rect.height/2);
+    } else {
+      playWrongSound();
+      spawnEmoji(false, rect.left + rect.width/2, rect.top + rect.height/2);
+    }
+    
+    userAnswers.set(qIdx, { selected: optIdx, correct: isCorrect });
+    answeredCount++;
+    updateUI();
+    
+    const btns = document.querySelectorAll(`#opts-${qIdx} .option-btn`);
+    if (isCorrect) {
+      btns[optIdx].classList.add('correct');
+    } else {
+      btns[optIdx].classList.add('wrong');
+      btns[question.ans].classList.add('correct');
+    }
+    for (let b of btns) b.classList.add('answered');
+    
+    if (answeredCount === totalQuestions) {
+      setTimeout(() => showResult(), 1200);
+    }
+  }
+
+  function showResult() {
+    const percentage = Math.round((score / totalQuestions) * 100);
+    let message = '';
+    if (percentage >= 90) message = "🏆 Exceptional performance! You're a biochemistry champion!";
+    else if (percentage >= 75) message = "🎉 Great job! Strong understanding of the material.";
+    else if (percentage >= 60) message = "👍 Good effort! Review the missed questions and try again.";
+    else message = "📚 Keep studying! Practice makes perfect.";
+    
+    resultScore.textContent = `${score} / ${totalQuestions}  (${percentage}%)`;
+    resultMsg.textContent = message;
+    resultOverlay.classList.add('show');
+  }
+
+  function closeResult() {
+    resultOverlay.classList.remove('show');
+    startQuiz(currentSem);
+  }
+
+  function startQuiz(sem) {
+    currentSem = sem;
+    currentQuestions = (sem === 1) ? [...sem1] : [...sem2];
+    totalQuestions = currentQuestions.length;
+    score = 0;
+    answeredCount = 0;
+    userAnswers.clear();
+    
+    homeDiv.style.display = 'none';
+    quizDiv.style.display = 'block';
+    quizTitle.textContent = sem === 1 ? '1st Semester' : '2nd Semester';
+    updateUI();
+    renderQuestions();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function goHome() {
+    homeDiv.style.display = 'flex';
+    quizDiv.style.display = 'none';
+    resultOverlay.classList.remove('show');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  document.querySelectorAll('.sem-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const sem = parseInt(card.dataset.sem);
+      startQuiz(sem);
+    });
+  });
+  
+  document.getElementById('backBtn').addEventListener('click', goHome);
+  document.getElementById('resultBtn').addEventListener('click', closeResult);
+})();
+</script>
+</body>
+</html>
